@@ -80,11 +80,11 @@
                 {{-- Pertanyaan --}}
                 <div class="flex-1" style="min-width:0;">
                     @if($role->type === 'program')
-                        <p style="font-weight:600;color:#1F2937;font-size:0.875rem;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        <p style="font-weight:600;color:#1F2937;font-size:0.875rem;line-height:1.4;">
                             {{ $question->menu_program }}
                         </p>
                     @else
-                        <p style="font-weight:500;color:#1F2937;font-size:0.875rem;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        <p style="font-weight:500;color:#1F2937;font-size:0.875rem;line-height:1.4;">
                             {{ $question->question }}
                         </p>
                     @endif

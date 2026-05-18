@@ -19,32 +19,38 @@ class UserController extends Controller
     return view('admin.users.index', compact('users'));
 }
 
-   public function create()
+public function create()
 {
     $roles = Role::where('is_active', true)->orderBy('order')->get();
-    return view('admin.users.create', compact('roles'));
+    $dealers = \App\Models\Dealer::where('is_active', true)->get();
+    return view('admin.users.create', compact('roles', 'dealers'));
 }
 
-   public function store(Request $request)
+  public function store(Request $request)
 {
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|min:6',
-        'roles' => 'required|array',
+        'user_type' => 'required|in:auditor,kacab',
+        'dealer_id' => 'required_if:user_type,kacab|nullable|exists:dealers,id',
     ]);
 
     $user = User::create([
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'user_type' => 'auditor',
+        'user_type' => $request->user_type,
+        'dealer_id' => $request->user_type === 'kacab' ? $request->dealer_id : null,
+        'is_active' => true,
     ]);
 
-    $user->roles()->sync($request->roles);
+    if ($request->user_type === 'auditor' && $request->roles) {
+        $user->roles()->sync($request->roles);
+    }
 
     return redirect()->route('admin.users.index')
-        ->with('success', 'User MD berhasil ditambahkan!');
+        ->with('success', 'User berhasil ditambahkan!');
 }
 
    public function edit(User $user)

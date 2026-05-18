@@ -77,3 +77,13 @@ Route::prefix('auditor')->name('auditor.')->middleware(['auth', 'auditor'])->gro
     Route::delete('pica/{pica}', [\App\Http\Controllers\Auditor\PicaController::class, 'destroy'])->name('pica.destroy');
 
 });
+
+// Kacab Routes
+Route::prefix('kacab')->name('kacab.')->middleware(['auth', 'kacab'])->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Kacab\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/rekap', [\App\Http\Controllers\Kacab\RekapController::class, 'index'])->name('rekap.index');
+    Route::get('/rekap/{session}', [\App\Http\Controllers\Kacab\RekapController::class, 'show'])->name('rekap.show');
+    Route::get('/summary', [\App\Http\Controllers\Kacab\SummaryController::class, 'index'])->name('summary');
+    Route::get('/pica', [\App\Http\Controllers\Kacab\PicaController::class, 'index'])->name('pica.index');
+    Route::get('/pica/{session}', [\App\Http\Controllers\Kacab\PicaController::class, 'show'])->name('pica.show');
+});

@@ -26,7 +26,33 @@
                     class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" required>
                 @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
-            <div class="mb-6">
+
+            {{-- Tipe User --}}
+            <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:0.72rem;font-weight:600;color:#6B7280;margin-bottom:6px;text-transform:uppercase;">Tipe User</label>
+                <select name="user_type" id="userTypeSelect" onchange="toggleUserType(this.value)"
+                    style="width:100%;border:1.5px solid #E5E7EB;border-radius:8px;padding:9px 12px;font-size:0.875rem;outline:none;">
+                    <option value="auditor" {{ old('user_type') === 'auditor' ? 'selected' : '' }}>Auditor MD</option>
+                    <option value="kacab" {{ old('user_type') === 'kacab' ? 'selected' : '' }}>Kepala Cabang</option>
+                </select>
+            </div>
+
+            {{-- Dealer (hanya untuk kacab) --}}
+            <div id="dealerSection" style="display:none;margin-bottom:14px;">
+                <label style="display:block;font-size:0.72rem;font-weight:600;color:#6B7280;margin-bottom:6px;text-transform:uppercase;">Dealer</label>
+                <select name="dealer_id" id="dealerSelect"
+                    style="width:100%;border:1.5px solid #E5E7EB;border-radius:8px;padding:9px 12px;font-size:0.875rem;outline:none;background:white;">
+                    <option value="">-- Pilih Dealer --</option>
+                    @foreach($dealers as $dealer)
+                    <option value="{{ $dealer->id }}" {{ old('dealer_id') == $dealer->id ? 'selected' : '' }}>
+                        {{ $dealer->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Role (hanya untuk auditor) --}}
+            <div class="mb-6" id="roleSection">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Role <span class="text-red-500">*</span></label>
                 <p class="text-xs text-gray-400 mb-2">Bisa pilih lebih dari satu role</p>
                 <div class="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-3">
@@ -45,6 +71,7 @@
                 </div>
                 @error('roles')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
+
             <button type="submit"
                 class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 font-medium">
                 Simpan User
@@ -52,4 +79,27 @@
         </form>
     </div>
 </div>
+
+<script>
+function toggleUserType(type) {
+    const dealerSection = document.getElementById('dealerSection');
+    const roleSection = document.getElementById('roleSection');
+    const dealerSelect = document.getElementById('dealerSelect');
+
+    if (type === 'kacab') {
+        dealerSection.style.display = 'block';
+        dealerSelect.setAttribute('required', 'required');
+        roleSection.style.display = 'none';
+    } else {
+        dealerSection.style.display = 'none';
+        dealerSelect.removeAttribute('required');
+        dealerSelect.value = '';
+        roleSection.style.display = 'block';
+    }
+}
+
+// Jalankan saat halaman load
+toggleUserType(document.getElementById('userTypeSelect').value);
+</script>
+
 @endsection

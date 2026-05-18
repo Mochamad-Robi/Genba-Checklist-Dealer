@@ -38,15 +38,21 @@
                 </td>
                 <td class="p-3">
                     <span class="px-2 py-1 rounded-full text-xs
-                        {{ $user->user_type === 'admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }}">
-                        {{ $user->user_type === 'admin' ? 'Admin' : 'Auditor MD' }}
+                        {{ $user->user_type === 'admin' ? 'bg-red-100 text-red-700' : ($user->user_type === 'kacab' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700') }}
+                        {{ $user->user_type === 'admin' ? 'Admin' : ($user->user_type === 'kacab' ? 'Kepala Cabang' : 'Auditor MD') }}
                     </span>
                 </td>
                 <td class="p-3">
                     <span class="px-2 py-1 rounded-full text-xs
-                        {{ $user->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                        {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                    </span>
+                    @if($user->user_type === 'admin') bg-red-100 text-red-700
+                    @elseif($user->user_type === 'kacab') bg-green-100 text-green-700
+                    @else bg-blue-100 text-blue-700
+                    @endif">
+                    @if($user->user_type === 'admin') Admin
+                    @elseif($user->user_type === 'kacab') Kepala Cabang
+                    @else Auditor MD
+                    @endif
+                </span>
                 </td>
                 <td class="p-3 flex gap-2">
                     <a href="{{ route('admin.users.edit', $user) }}"
