@@ -7,27 +7,47 @@ use Illuminate\Http\Request;
 
 class PicaController extends Controller
 {
-   public function index(Request $request)
-{
-    $dealerId = auth()->user()->dealer_id;
-    $status = $request->status;
+    public function index(Request $request)
+    {
+        $dealerId = auth()->user()->dealer_id;
 
-    $sessions = GenbaSession::with(['role', 'user', 'picas'])
-        ->where('dealer_id', $dealerId)
-        ->where('status', 'submitted')
-        ->whereHas('picas')
-        ->latest()
-        ->paginate(20);
+        $status = $request->status;
+        $month  = $request->month ?? now()->month;
+        $year   = $request->year  ?? now()->year;
 
-    $totalOpen = Pica::whereHas('session', fn($q) => $q->where('dealer_id', $dealerId))
-        ->where('status', 'open')->count();
-    $totalOnProgress = Pica::whereHas('session', fn($q) => $q->where('dealer_id', $dealerId))
-        ->where('status', 'on_progress')->count();
-    $totalClosed = Pica::whereHas('session', fn($q) => $q->where('dealer_id', $dealerId))
-        ->where('status', 'closed')->count();
+        $sessions = GenbaSession::with(['role', 'user', 'picas'])
+            ->where('dealer_id', $dealerId)
+            ->where('status', 'submitted')
+            ->whereHas('picas', function($q) use ($status) {
+                if ($status) $q->where('status', $status);
+            })
+            ->whereMonth('submitted_at', $month)
+            ->whereYear('submitted_at', $year)
+            ->latest('submitted_at')
+            ->paginate(20);
 
-    return view('kacab.pica', compact('sessions', 'totalOpen', 'totalOnProgress', 'totalClosed', 'status'));
-}
+        $sessionsByDate = $sessions->getCollection()
+            ->groupBy(fn($s) => $s->submitted_at?->format('d/m/Y'));
+
+        // Stats ikut filter bulan/tahun
+        $picaBase = Pica::whereHas('session', fn($q) =>
+            $q->where('dealer_id', $dealerId)
+              ->whereMonth('submitted_at', $month)
+              ->whereYear('submitted_at', $year)
+        );
+
+        $totalOpen       = (clone $picaBase)->where('status', 'open')->count();
+        $totalOnProgress = (clone $picaBase)->where('status', 'on_progress')->count();
+        $totalClosed     = (clone $picaBase)->where('status', 'closed')->count();
+
+        $availableYears = range(now()->year, now()->year - 3);
+
+        return view('kacab.pica', compact(
+            'sessions', 'sessionsByDate',
+            'totalOpen', 'totalOnProgress', 'totalClosed',
+            'status', 'month', 'year', 'availableYears'
+        ));
+    }
 
     public function show(GenbaSession $session)
     {
